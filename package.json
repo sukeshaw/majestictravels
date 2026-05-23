@@ -1,0 +1,50 @@
+{
+  "name": "travel-ventures-website",
+  "version": "1.0.0",
+  "description": "Complete travel agency booking website with enquiry forms and contact management",
+  "main": "travel_agency_backend.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node travel_agency_backend.js",
+    "dev": "nodemon travel_agency_backend.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test-email": "node test-email.js",
+    "seed-db": "node scripts/seed-database.js"
+  },
+  "keywords": [
+    "travel",
+    "tour",
+    "booking",
+    "cab",
+    "bus",
+    "enquiry",
+    "agency"
+  ],
+  "author": "TravelVentures Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "mysql2": "^3.6.5",
+    "nodemailer": "^6.9.7",
+    "validator": "^13.11.0",
+    "express-rate-limit": "^7.1.5",
+    "@sendgrid/mail": "^7.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/travel-ventures-website.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/travel-ventures-website/issues"
+  },
+  "homepage": "https://travelventures.com"
+}
