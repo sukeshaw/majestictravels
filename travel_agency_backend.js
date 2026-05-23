@@ -155,7 +155,7 @@ async function sendAdminNotification(enquiryData) {
 
         <hr>
         <p style="color: #666; font-size: 12px;">
-            This is an automated notification from MajesticTravels Enquiry System.
+            This is an automated notification from Majestic Holidays Enquiry System.
         </p>
     `;
 
@@ -204,7 +204,7 @@ async function sendCustomerConfirmation(enquiryData, enquiryId) {
         <h3>Contact Information</h3>
         <p>
             If you need to reach us:<br>
-            <strong>Email:</strong> enquiry@MajesticTravels.com<br>
+            <strong>Email:</strong> enquiry@Majestic Holidays.com<br>
             <strong>Phone:</strong> +91-9876543210<br>
             <strong>WhatsApp:</strong> +91-9000000001<br>
             <strong>Working Hours:</strong> Monday - Saturday, 9:00 AM - 6:00 PM
@@ -213,7 +213,7 @@ async function sendCustomerConfirmation(enquiryData, enquiryId) {
         <hr>
 
         <p>Best regards,<br>
-        <strong>MajesticTravels Team</strong><br>
+        <strong>Majestic Holidays Team</strong><br>
         Making your travel dreams come true!</p>
 
         <p style="color: #999; font-size: 12px;">
@@ -246,7 +246,7 @@ async function sendContactFormResponse(contactData) {
         
         <p>Dear ${contactData.name},</p>
 
-        <p>Thank you for reaching out to MajesticTravels. We have received your message and will respond as soon as possible.</p>
+        <p>Thank you for reaching out to Majestic Holidays. We have received your message and will respond as soon as possible.</p>
 
         <p><strong>Your Message Subject:</strong> ${contactData.subject}</p>
 
@@ -257,7 +257,7 @@ async function sendContactFormResponse(contactData) {
 
         <h3>Our Contact Details</h3>
         <p>
-            <strong>Email:</strong> info@MajesticTravels.com<br>
+            <strong>Email:</strong> info@Majestic Holidays.com<br>
             <strong>Phone:</strong> +91-9876543210<br>
             <strong>WhatsApp:</strong> +91-9000000001<br>
             <strong>Office Address:</strong> 123 Tour Street, Kozhikode, Kerala 673001<br>
@@ -267,13 +267,13 @@ async function sendContactFormResponse(contactData) {
         <hr>
 
         <p>Best regards,<br>
-        <strong>MajesticTravels Team</strong></p>
+        <strong>Majestic Holidays Team</strong></p>
     `;
 
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: contactData.email,
-        subject: 'We Received Your Message - MajesticTravels',
+        subject: 'We Received Your Message - Majestic Holidays',
         html: htmlContent
     };
 
@@ -484,7 +484,7 @@ app.get('/api/health', (req, res) => {
     res.json({
         status: 'OK',
         timestamp: new Date().toISOString(),
-        service: 'MajesticTravels API',
+        service: 'Majestic Holidays API',
         version: '1.0.0'
     });
 });
@@ -524,7 +524,7 @@ app.use((error, req, res, next) => {
 // ============================================
 
 app.listen(PORT, () => {
-    console.log(`🚀 MajesticTravels API Server running on port ${PORT}`);
+    console.log(`🚀 Majestic Holidays API Server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
