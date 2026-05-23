@@ -14,6 +14,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const validator = require('validator');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 // Load environment variables
 dotenv.config();
@@ -28,6 +29,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname)));
 
 // Rate limiting - prevent spam submissions
 const enquiryLimiter = rateLimit({
@@ -485,6 +487,14 @@ app.get('/api/health', (req, res) => {
         service: 'MajesticTravels API',
         version: '1.0.0'
     });
+});
+
+/**
+ * GET /
+ * Serve the website homepage
+ */
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'travel_agency_website.html'));
 });
 
 /**
