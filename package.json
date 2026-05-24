@@ -23,14 +23,13 @@
   "author": "TravelVentures Team",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
+    "@supabase/supabase-js": "^2.106.1",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "mysql2": "^3.6.5",
-    "nodemailer": "^6.9.7",
-    "validator": "^13.11.0",
+    "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
-    "@sendgrid/mail": "^7.7.0"
+    "resend": "^6.12.3",
+    "validator": "^13.11.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

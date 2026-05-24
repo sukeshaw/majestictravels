@@ -3,21 +3,25 @@
  * Handles enquiry submissions, email notifications, and contact form submissions
  * 
  * Technology: Node.js + Express
- * Email Service: Nodemailer / SendGrid
- * Database: MySQL
+ * Email Service: Resend
+ * Database: Supabase
  */
 
 const express = require('express');
-const mysql = require('mysql2/promise');
-const nodemailer = require('nodemailer');
+const { createClient } = require('@supabase/supabase-js');
+const { Resend } = require('resend');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const validator = require('validator');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const constants = require('./constants.js');
 
 // Load environment variables
 dotenv.config();
+
+const resend = new Resend(process.env.RESEND_API_KEY || '');
+const defaultEmailFrom = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_USER || 'no-reply@travelventures.com';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -42,32 +46,17 @@ const enquiryLimiter = rateLimit({
 // EMAIL CONFIGURATION
 // ============================================
 
-const emailTransporter = nodemailer.createTransport({
-    service: 'gmail', // Or use SendGrid, Mailgun, etc.
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-    }
-});
-
-// Alternative: Using SendGrid
-// const sgMail = require('@sendgrid/mail');
-// sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// Resend email client
+// Ensure RESEND_API_KEY and RESEND_FROM_EMAIL are set in .env
 
 // ============================================
-// DATABASE CONNECTION POOL
+// SUPABASE CONNECTION
 // ============================================
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'travel_agency',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
-
+const supabase = createClient(
+    process.env.SUPABASE_URL || '',
+    process.env.SUPABASE_ANON_KEY || ''
+);
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
@@ -167,7 +156,12 @@ async function sendAdminNotification(enquiryData) {
     };
 
     try {
-        await emailTransporter.sendMail(mailOptions);
+        await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL || defaultEmailFrom,
+            to: process.env.ADMIN_EMAIL,
+            subject: mailOptions.subject,
+            html: mailOptions.html
+        });
         console.log('Admin notification sent');
     } catch (error) {
         console.error('Error sending admin email:', error);
@@ -204,9 +198,10 @@ async function sendCustomerConfirmation(enquiryData, enquiryId) {
         <h3>Contact Information</h3>
         <p>
             If you need to reach us:<br>
-            <strong>Email:</strong> enquiry@Majestic Holidays.com<br>
-            <strong>Phone:</strong> +91-9876543210<br>
-            <strong>WhatsApp:</strong> +91-9000000001<br>
+            <strong>Email:</strong> ${constants.ENQUIRY_EMAIL}<br>
+            <strong>Phone:</strong> ${constants.LAND_LINE}<br>
+            <strong>WhatsApp:</strong> ${constants.WHATSAPP_NUMBER}<br>
+            <strong>Office Address:</strong> ${constants.OFFICE_ADDRESS}<br>
             <strong>Working Hours:</strong> Monday - Saturday, 9:00 AM - 6:00 PM
         </p>
 
@@ -229,7 +224,12 @@ async function sendCustomerConfirmation(enquiryData, enquiryId) {
     };
 
     try {
-        await emailTransporter.sendMail(mailOptions);
+        await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL || defaultEmailFrom,
+            to: enquiryData.email,
+            subject: mailOptions.subject,
+            html: mailOptions.html
+        });
         console.log('Customer confirmation sent');
     } catch (error) {
         console.error('Error sending customer email:', error);
@@ -251,16 +251,16 @@ async function sendContactFormResponse(contactData) {
         <p><strong>Your Message Subject:</strong> ${contactData.subject}</p>
 
         <p>Our team typically responds to messages within 24 business hours. If your matter is urgent, 
-        please feel free to call us directly at <strong>+91-9876543210</strong>.</p>
+        please feel free to call us directly at <strong>${constants.LAND_LINE}</strong>.</p>
 
         <hr>
 
         <h3>Our Contact Details</h3>
         <p>
-            <strong>Email:</strong> info@Majestic Holidays.com<br>
-            <strong>Phone:</strong> +91-9876543210<br>
-            <strong>WhatsApp:</strong> +91-9000000001<br>
-            <strong>Office Address:</strong> 123 Tour Street, Kozhikode, Kerala 673001<br>
+            <strong>Email:</strong> ${constants.ENQUIRY_EMAIL}<br>
+            <strong>Phone:</strong> ${constants.LAND_LINE}<br>
+            <strong>WhatsApp:</strong> ${constants.WHATSAPP_NUMBER}<br>
+            <strong>Office Address:</strong> ${constants.OFFICE_ADDRESS}<br>
             <strong>Working Hours:</strong> Monday - Saturday, 9:00 AM - 6:00 PM
         </p>
 
@@ -278,7 +278,12 @@ async function sendContactFormResponse(contactData) {
     };
 
     try {
-        await emailTransporter.sendMail(mailOptions);
+        await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL || defaultEmailFrom,
+            to: contactData.email,
+            subject: mailOptions.subject,
+            html: mailOptions.html
+        });
         console.log('Contact form response sent');
     } catch (error) {
         console.error('Error sending contact response email:', error);
@@ -307,40 +312,41 @@ app.post('/api/enquiries', enquiryLimiter, async (req, res) => {
             });
         }
 
-        // Get database connection
-        const connection = await pool.getConnection();
-
         try {
-            // Insert enquiry into database
-            const [result] = await connection.execute(
-                `INSERT INTO enquiries 
-                (guest_name, guest_email, guest_phone, service_type, enquiry_status, created_at, notes)
-                VALUES (?, ?, ?, ?, 'New', NOW(), ?)`,
-                [
-                    enquiryData.name,
-                    enquiryData.email,
-                    enquiryData.phone,
-                    enquiryData.type,
-                    JSON.stringify({
-                        destination: enquiryData.destination,
-                        num_travelers: enquiryData.num_travelers,
-                        duration: enquiryData.duration,
-                        travel_date: enquiryData.travel_date,
-                        budget: enquiryData.budget,
-                        pickup_location: enquiryData.pickup_location,
-                        dropoff_location: enquiryData.dropoff_location,
-                        travel_time: enquiryData.travel_time,
-                        vehicle_type: enquiryData.vehicle_type,
-                        departure_city: enquiryData.departure_city,
-                        destination_city: enquiryData.destination_city,
-                        return_date: enquiryData.return_date,
-                        bus_type: enquiryData.bus_type,
-                        special_requests: enquiryData.special_requests
-                    })
-                ]
-            );
+            // Insert enquiry into Supabase
+            const { data, error } = await supabase
+                .from('enquiries')
+                .insert([
+                    {
+                        name: enquiryData.name,
+                        email: enquiryData.email,
+                        phone: enquiryData.phone,
+                        service_type: enquiryData.type,
+                        status: 'New',
+                        destination: enquiryData.destination || null,
+                        num_travelers: enquiryData.num_travelers || null,
+                        duration: enquiryData.duration || null,
+                        travel_date: enquiryData.travel_date || null,
+                        budget: enquiryData.budget || null,
+                        pickup_location: enquiryData.pickup_location || null,
+                        dropoff_location: enquiryData.dropoff_location || null,
+                        num_passengers: enquiryData.num_passengers || null,
+                        travel_time: enquiryData.travel_time || null,
+                        vehicle_type: enquiryData.vehicle_type || null,
+                        departure_city: enquiryData.departure_city || null,
+                        destination_city: enquiryData.destination_city || null,
+                        return_date: enquiryData.return_date || null,
+                        bus_type: enquiryData.bus_type || null,
+                        special_requests: enquiryData.special_requests || null
+                    }
+                ])
+                .select();
 
-            const enquiryId = `TRV${Date.now()}${result.insertId}`;
+            if (error) {
+                throw new Error(`Supabase insert error: ${error.message}`);
+            }
+
+            const enquiryId = `TRV${data[0].id}`;
 
             // Send emails
             await Promise.all([
@@ -354,15 +360,20 @@ app.post('/api/enquiries', enquiryLimiter, async (req, res) => {
                 message: 'Enquiry submitted successfully',
                 enquiryId: enquiryId,
                 data: {
-                    id: result.insertId,
+                    id: data[0].id,
                     reference: enquiryId,
                     email: enquiryData.email,
                     phone: enquiryData.phone
                 }
             });
 
-        } finally {
-            connection.release();
+        } catch (error) {
+            console.error('Enquiry processing error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error processing your enquiry. Please try again.',
+                error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
         }
 
     } catch (error) {
@@ -399,22 +410,25 @@ app.post('/api/contact', rateLimit({
             return res.status(400).json({ success: false, message: 'Message must be at least 10 characters' });
         }
 
-        // Get database connection
-        const connection = await pool.getConnection();
-
         try {
-            // Save contact message to database
-            await connection.execute(
-                `INSERT INTO contact_messages (name, email, phone, subject, message, created_at)
-                 VALUES (?, ?, ?, ?, ?, NOW())`,
-                [
-                    contactData.name,
-                    contactData.email,
-                    contactData.phone || null,
-                    contactData.subject || 'General Enquiry',
-                    contactData.message
-                ]
-            );
+            // Save contact message to Supabase
+            const { data, error } = await supabase
+                .from('contact_messages')
+                .insert([
+                    {
+                        name: contactData.name,
+                        email: contactData.email,
+                        phone: contactData.phone || null,
+                        subject: contactData.subject || 'General Enquiry',
+                        message: contactData.message,
+                        created_at: new Date().toISOString()
+                    }
+                ])
+                .select();
+
+            if (error) {
+                throw new Error(`Supabase insert error: ${error.message}`);
+            }
 
             // Send confirmation email
             await sendContactFormResponse(contactData);
@@ -424,8 +438,13 @@ app.post('/api/contact', rateLimit({
                 message: 'Your message has been sent successfully'
             });
 
-        } finally {
-            connection.release();
+        } catch (error) {
+            console.error('Contact form processing error:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error submitting your message. Please try again.',
+                error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
         }
 
     } catch (error) {
@@ -440,38 +459,43 @@ app.post('/api/contact', rateLimit({
 /**
  * GET /api/enquiries/:enquiryId
  * Get enquiry details (for tracking)
+ * Accepts both 'TRV123' format or numeric ID
  */
 app.get('/api/enquiries/:enquiryId', async (req, res) => {
     try {
-        const connection = await pool.getConnection();
-
-        try {
-            const [rows] = await connection.execute(
-                'SELECT * FROM enquiries WHERE enquiry_id = ? LIMIT 1',
-                [req.params.enquiryId]
-            );
-
-            if (rows.length === 0) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Enquiry not found'
-                });
-            }
-
-            res.json({
-                success: true,
-                data: rows[0]
-            });
-
-        } finally {
-            connection.release();
+        let enquiryId = req.params.enquiryId;
+        let idValue = enquiryId;
+        
+        // If enquiry ID starts with 'TRV', extract the numeric part
+        if (enquiryId.startsWith('TRV')) {
+            idValue = enquiryId.substring(3);
         }
+
+        const { data, error } = await supabase
+            .from('enquiries')
+            .select('*')
+            .eq('id', parseInt(idValue))
+            .limit(1)
+            .single();
+
+        if (error || !data) {
+            return res.status(404).json({
+                success: false,
+                message: 'Enquiry not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: data
+        });
 
     } catch (error) {
         console.error('Error fetching enquiry:', error);
         res.status(500).json({
             success: false,
-            message: 'Error fetching enquiry details'
+            message: 'Error fetching enquiry details',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 });
@@ -531,7 +555,6 @@ app.listen(PORT, () => {
 // Graceful shutdown
 process.on('SIGINT', async () => {
     console.log('Shutting down gracefully...');
-    await pool.end();
     process.exit(0);
 });
 
