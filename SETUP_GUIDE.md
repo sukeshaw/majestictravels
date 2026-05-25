@@ -1,4 +1,4 @@
-# TravelVentures Website - Complete Setup Guide
+# majesticholidays.online Website - Complete Setup Guide
 
 ## 📋 Table of Contents
 1. [Project Overview](#overview)
@@ -15,7 +15,7 @@
 
 ## <a name="overview"></a>Project Overview
 
-**TravelVentures** is a complete travel agency booking website with:
+**majesticholidays.online** is a complete travel agency booking website with:
 - Professional landing page
 - Service listings (Tours, Cabs, Buses)
 - Dynamic enquiry forms for each service type
@@ -124,7 +124,7 @@ DB_NAME=travel_agency
 # Email Configuration (Gmail Example)
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASSWORD=your-app-password
-ADMIN_EMAIL=admin@travelventures.com
+ADMIN_EMAIL=admin@majesticholidays.online.com
 
 # Alternatively, use SendGrid
 # SENDGRID_API_KEY=SG.xxxxxxxxxxxxx
@@ -164,7 +164,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 // Then use:
 sgMail.send({
     to: 'user@example.com',
-    from: 'info@travelventures.com',
+    from: 'info@majesticholidays.online.com',
     subject: 'Enquiry Confirmation',
     html: htmlContent
 });
@@ -251,7 +251,7 @@ node travel_agency_backend.js
 
 Expected output:
 ```
-🚀 TravelVentures API Server running on port 5000
+🚀 majesticholidays.online API Server running on port 5000
 Environment: development
 ```
 
@@ -278,7 +278,7 @@ Run with process manager:
 ```bash
 npm install -g pm2
 
-pm2 start travel_agency_backend.js --name "travelventures-api"
+pm2 start travel_agency_backend.js --name "majesticholidays.online-api"
 pm2 save
 pm2 startup
 ```
@@ -438,7 +438,7 @@ const enquiryLimiter = rateLimit({
 
 ```bash
 # Backend logs
-pm2 logs travelventures-api
+pm2 logs majesticholidays.online-api
 
 # MySQL logs
 tail -f /var/log/mysql/error.log
@@ -527,9 +527,9 @@ npm run test-email
 The website includes contact details:
 - **Office**: 123 Tour Street, Kozhikode, Kerala 673001
 - **Email**: 
-  - General: info@travelventures.com
-  - Enquiries: enquiry@travelventures.com
-  - Support: support@travelventures.com
+  - General: info@majesticholidays.online.com
+  - Enquiries: enquiry@majesticholidays.online.com
+  - Support: support@majesticholidays.online.com
 - **Phone**:
   - Toll Free: +91-800-123-4567
   - Mobile: +91-9876-543-210
@@ -566,14 +566,14 @@ After setup, consider:
 
 ## 📄 License
 
-This project is provided as-is for use by TravelVentures.
+This project is provided as-is for use by majesticholidays.online.
 
 ---
 
 ## ✅ Setup Verification Checklist
 
 - [ ] Node.js installed
-- [ ] MySQL running
+- [ ] Supabase running
 - [ ] Database created
 - [ ] Dependencies installed (`npm install`)
 - [ ] `.env` file created with all variables

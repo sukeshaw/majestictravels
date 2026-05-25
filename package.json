@@ -20,7 +20,7 @@
     "enquiry",
     "agency"
   ],
-  "author": "TravelVentures Team",
+  "author": "majesticholidays.online Team",
   "license": "MIT",
   "dependencies": {
     "@supabase/supabase-js": "^2.106.1",
@@ -45,5 +45,5 @@
   "bugs": {
     "url": "https://github.com/yourusername/travel-ventures-website/issues"
   },
-  "homepage": "https://travelventures.com"
+  "homepage": "https://majesticholidays.online.com"
 }
