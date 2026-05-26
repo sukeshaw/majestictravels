@@ -19,7 +19,14 @@
      --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
  }
 
- body {
+ html,
+body {
+     width: 100%;
+     min-width: 100%;
+     overflow-x: hidden;
+ }
+
+body {
      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
      line-height: 1.6;
      color: var(--text-primary);
@@ -48,6 +55,14 @@
      font-size: 1.8rem;
      font-weight: 700;
      color: var(--primary-color);
+     max-width: 180px;
+ }
+
+.logo img {
+     display: block;
+     width: 100%;
+     max-width: 180px;
+     height: auto;
  }
 
 nav ul {
@@ -67,18 +82,78 @@ nav a:hover {
      color: var(--primary-color);
  }
 
+.nav-toggle {
+     display: none;
+     background: none;
+     border: none;
+     cursor: pointer;
+     padding: 0.25rem;
+     width: 42px;
+     height: 42px;
+     display: flex;
+     flex-direction: column;
+     justify-content: center;
+     gap: 6px;
+ }
+
+.nav-toggle span {
+     display: block;
+     width: 100%;
+     height: 3px;
+     background: var(--text-primary);
+     border-radius: 999px;
+     transition: transform 0.3s ease, opacity 0.3s ease;
+ }
+
+nav.open .nav-toggle span:nth-child(1) {
+     transform: translateY(9px) rotate(45deg);
+ }
+
+nav.open .nav-toggle span:nth-child(2) {
+     opacity: 0;
+ }
+
+nav.open .nav-toggle span:nth-child(3) {
+     transform: translateY(-9px) rotate(-45deg);
+ }
+
 @media (max-width: 768px) {
      nav {
          flex-direction: column;
-         align-items: flex-start;
+         align-items: center;
          gap: 1rem;
-         padding: 1rem 1.5rem;
+         padding: 1.25rem 1rem 1rem 1rem;
+         position: relative;
+     }
+
+     .nav-toggle {
+         display: flex;
+         position: absolute;
+         top: 0.75rem;
+         left: 0.75rem;
+         z-index: 10;
+     }
+
+     .logo {
+         max-width: 140px;
+         margin: 0 auto;
      }
 
      nav ul {
+         display: none;
          flex-wrap: wrap;
-         gap: 1rem;
+         gap: 0.75rem;
          width: 100%;
+         flex-direction: column;
+         background: var(--bg-white);
+         padding: 0.85rem 0.75rem;
+         border-radius: 0.85rem;
+         border: 1px solid var(--border-color);
+         box-shadow: var(--shadow);
+     }
+
+     nav.open ul {
+         display: flex;
      }
 
      nav li {
@@ -87,18 +162,18 @@ nav a:hover {
 
      nav a {
          display: block;
-         padding: 0.65rem 0.85rem;
+         padding: 0.5rem 0.75rem;
          border-radius: 0.5rem;
      }
 }
 
 @media (max-width: 590px) {
      .logo {
-         font-size: 1.5rem;
+         max-width: 120px;
      }
 
      nav {
-         padding: 1rem;
+         padding: 1.4rem 0.9rem 1rem 1rem;
      }
 
      nav ul {
@@ -108,22 +183,27 @@ nav a:hover {
 
 @media (max-width: 425px) {
      .logo {
-         font-size: 1rem;
+         max-width: 100px;
+     }
+
+     .nav-toggle {
+         top: 0.6rem;
+         left: 0.6rem;
      }
 
      nav {
-         padding: 0.75rem 1rem;
+         padding: 1.1rem 0.8rem 1rem 0.95rem;
      }
 
      nav ul {
          flex-direction: column;
          align-items: stretch;
-         gap: 0.75rem;
+         gap: 0.6rem;
      }
 
      nav a {
          text-align: center;
-         padding: 0.85rem 1rem;
+         padding: 0.6rem 0.75rem;
      }
 }
  .hero {
