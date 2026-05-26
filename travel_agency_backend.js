@@ -549,15 +549,24 @@ app.use((error, req, res, next) => {
 // START SERVER
 // ============================================
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`🚀 Majestic Holidays API Server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use. Please stop the process using that port or set a different PORT environment variable.`);
+    } else {
+        console.error('Server error:', error);
+    }
+    process.exit(1);
 });
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
     console.log('Shutting down gracefully...');
-    process.exit(0);
+    server.close(() => process.exit(0));
 });
 
 module.exports = app;
