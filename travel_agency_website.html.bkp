@@ -14,14 +14,14 @@
     <meta favicon="assets/icon.png" type="image/x-icon">
     <meta favicon="assets/icon.png" type="image/png">
     <title>Majestic Holidays | Malabar Tourism Tours, Cabs & Bus Bookings</title>
-    <link rel="stylesheet" href="styles.css"/>
+    <link rel="stylesheet" href="/styles.css"/>
 </head>
 <body>
 
 <!-- Navigation Header -->
 <header>
     <nav>
-        <div class="logo"><img width="150" height="auto" alt="Majestic Holidays Logo" src="assets/logo.png" /></div>
+        <div class="logo"><img width="150" height="auto" alt="Majestic Holidays Logo" src="/assets/logo.png" /></div>
         <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" onclick="toggleNav()">
             <span></span>
             <span></span>
