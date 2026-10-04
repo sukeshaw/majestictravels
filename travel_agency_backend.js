@@ -14,6 +14,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const validator = require('validator');
 const rateLimit = require('express-rate-limit');
+const fs = require('fs');
 const path = require('path');
 const constants = require('./constants.js');
 
@@ -34,8 +35,13 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// Serve static files from "public" folder
-app.use(express.static(path.join(__dirname, 'public')));
+
+const staticDir = fs.existsSync(path.join(__dirname, 'dist'))
+    ? path.join(__dirname, 'dist')
+    : path.join(__dirname, 'public');
+
+// Serve static files from the production build or public folder as fallback
+app.use(express.static(staticDir));
 
 // Rate limiting - prevent spam submissions
 const enquiryLimiter = rateLimit({
@@ -522,6 +528,16 @@ app.get('/api/health', (req, res) => {
 /* app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'travel_agency_website.html'));
 }); */
+
+/**
+ * 404 Handler for SPA routes and unknown pages
+ */
+app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+        return next();
+    }
+    res.sendFile(path.join(staticDir, 'index.html'));
+});
 
 /**
  * 404 Handler
