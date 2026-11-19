@@ -3,6 +3,7 @@ import { useState } from 'react';
 const navLinks = [
   { href: '#home', label: 'Home' },
   { href: '#services', label: 'Services' },
+  { href: '#contact', label: 'Sabarimala Tour', action: 'sabarimala' },
   { href: '#enquiry', label: 'Enquiry' },
   { href: '#contact', label: 'Contact' }
 ];
@@ -33,7 +34,7 @@ const durations = ['2-3 days', '4-5 days', '6-7 days', '8-10 days', '10+ days'];
 const budgets = ['Below ₹5,000', '₹5,000 - ₹10,000', '₹10,000 - ₹20,000', '₹20,000+'];
 const vehicleTypes = ['Any Type', 'Economy', 'Comfort (AC)', 'Premium (Luxury)'];
 const cities = ['Kozhikode', 'Kochi', 'Thiruvananthapuram', 'Bangalore', 'Chennai', 'Hyderabad', 'Other'];
-const contactSubjects = ['General Enquiry', 'Booking Help', 'Complaint', 'Partnership', 'Other'];
+const contactSubjects = ['General Enquiry', 'Booking Help', 'Sabarimala Tour', 'Complaint', 'Partnership', 'Other'];
 
 const apiBase = import.meta.env.VITE_API_BASE?.replace(/\/$/, '') || '';
 
@@ -42,6 +43,8 @@ function App() {
   const [activeTab, setActiveTab] = useState('tour');
   const [successMessages, setSuccessMessages] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactSubject, setContactSubject] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
 
   const toggleNav = () => setNavOpen((value) => !value);
 
@@ -50,6 +53,13 @@ function App() {
     setNavOpen(false);
     const section = document.getElementById('enquiry');
     section?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleSabarimalaClick = () => {
+    setContactSubject('Sabarimala Tour');
+    setContactMessage('No of people:\nDate of travel:');
+    setNavOpen(false);
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const clearMessage = (key) => {
@@ -150,6 +160,10 @@ function App() {
 
     if (submitted) {
       form.reset();
+      if (type === 'Contact Message') {
+        setContactSubject('');
+        setContactMessage('');
+      }
     }
   };
 
@@ -172,8 +186,18 @@ function App() {
           </button>
           <ul>
             {navLinks.map((link) => (
-              <li key={link.href}>
-                <a href={link.href} onClick={() => setNavOpen(false)}>
+              <li key={link.label}>
+                <a
+                  href={link.href}
+                  onClick={(event) => {
+                    if (link.action === 'sabarimala') {
+                      event.preventDefault();
+                      handleSabarimalaClick();
+                    } else {
+                      setNavOpen(false);
+                    }
+                  }}
+                >
                   {link.label}
                 </a>
               </li>
@@ -209,6 +233,25 @@ function App() {
                 </button>
               </div>
             ))}
+            <div
+              className="service-card"
+              role="button"
+              tabIndex={0}
+              onClick={handleSabarimalaClick}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  handleSabarimalaClick();
+                }
+              }}
+            >
+              <div className="service-icon">🙏</div>
+              <h3>Sabarimala Tour</h3>
+              <p>Plan your pilgrimage to Sabarimala with a travel package tailored to your group.</p>
+              <span className="cta-button" style={{ background: 'var(--secondary-color)' }}>
+                Enquire Now
+              </span>
+            </div>
           </div>
         </div>
       </section>
@@ -573,7 +616,12 @@ function App() {
 
                 <div className="form-group">
                   <label>Subject *</label>
-                  <select name="subject" required>
+                  <select
+                    name="subject"
+                    value={contactSubject}
+                    onChange={(event) => setContactSubject(event.target.value)}
+                    required
+                  >
                     <option value="">Select Subject</option>
                     {contactSubjects.map((subject) => (
                       <option key={subject} value={subject}>
@@ -585,7 +633,13 @@ function App() {
 
                 <div className="form-group">
                   <label>Message *</label>
-                  <textarea name="message" placeholder="Write your message here..." required></textarea>
+                  <textarea
+                    name="message"
+                    value={contactMessage}
+                    onChange={(event) => setContactMessage(event.target.value)}
+                    placeholder="Write your message here..."
+                    required
+                  ></textarea>
                 </div>
 
                 <button type="submit" className="submit-button" disabled={isSubmitting}>

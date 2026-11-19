@@ -509,16 +509,46 @@ app.get('/api/enquiries/:enquiryId', async (req, res) => {
 });
 
 /**
- * GET /api/health
- * Health check endpoint
+ * GET /health
+ * Check API and Supabase database health
  */
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        service: 'Majestic Holidays API',
-        version: '1.0.0'
-    });
+app.get(['/health', '/api/health'], async (req, res) => {
+    const timestamp = new Date().toISOString();
+
+    try {
+        const { error } = await supabase
+            .from('enquiries')
+            .select('id', { head: true })
+            .limit(1);
+
+        if (error) {
+            console.error('Supabase health check failed:', error);
+            return res.status(503).json({
+                status: 'error',
+                timestamp,
+                service: 'Majestic Holidays API',
+                database: 'disconnected',
+                message: 'Database health check failed'
+            });
+        }
+
+        return res.json({
+            status: 'ok',
+            timestamp,
+            service: 'Majestic Holidays API',
+            version: '1.0.0',
+            database: 'connected'
+        });
+    } catch (error) {
+        console.error('Supabase health check failed:', error);
+        return res.status(503).json({
+            status: 'error',
+            timestamp,
+            service: 'Majestic Holidays API',
+            database: 'disconnected',
+            message: 'Database health check failed'
+        });
+    }
 });
 
 /**
